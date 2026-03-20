@@ -183,4 +183,3 @@ window.onload = function(){
         .style("stroke", "#000"); //black circle stroke
 
 };
-

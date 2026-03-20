@@ -1,5 +1,18 @@
 /*Add CSS styles here*/
 
+body {
+	margin: 0;
+	padding: 24px;
+	font-family: sans-serif;
+	background: #f7f4ea;
+}
+
+.container {
+	display: block;
+	margin: 0;
+	background: #fffdf8;
+}
+
 .axis path,
 .axis line {
 	fill: none;
@@ -12,8 +25,39 @@
 	font-family: sans-serif;
 	font-size: 0.9em;
 }
+
+.axisLabel {
+	font-size: 1em;
+	font-weight: 600;
+	fill: #2d2d2d;
+}
+
 .title {
     font-family: sans-serif;
-    font-size: 1.5em;
+    font-size: 1.4em;
     font-weight: bold;
+    fill: #1f1f1f;
+}
+
+.chartNote {
+	font-size: 0.9em;
+	fill: #4a4a4a;
+}
+
+.tooltip {
+	position: absolute;
+	padding: 0.7rem 0.9rem;
+	background: rgba(31, 31, 31, 0.92);
+	color: #fffdf8;
+	border-radius: 6px;
+	font-size: 0.9em;
+	line-height: 1.35;
+	pointer-events: none;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+
+.tooltipTitle {
+	font-weight: 600;
+	margin-bottom: 0.2rem;
 }
