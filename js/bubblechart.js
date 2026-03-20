@@ -85,6 +85,75 @@ window.onload = function(){
         .attr("transform", "translate(50, 0)")
         .call(yAxis);
 
+    //below Example 3.9...create a text element and add the title
+    var title = container.append("text")
+        .attr("class", "title")
+        .attr("text-anchor", "middle")
+        .attr("x", 450)
+        .attr("y", 30)
+        .text("City Populations");
+    //Example 3.14 line 1...create circle labels
+    var labels = container.selectAll(".labels")
+        .data(cityPop)
+        .enter()
+        .append("text")
+        .attr("class", "labels")
+        .attr("text-anchor", "left")
+        .attr("y", function(d){
+            //vertical position centered on each circle
+            return y(d.population) + 5;
+        })
+        ;
+
+    //first line of label
+    var nameLine = labels.append("tspan")
+        .attr("class", "nameLine")
+        .attr("x", function(d,i){
+            //horizontal position to the right of each circle
+            return x(i) + Math.sqrt(d.population * 0.01 / Math.PI) + 5;
+        })
+        .text(function(d){
+            return d.city;
+        });
+
+    //create format generator
+    var format = d3.format(",");
+
+    //Example 3.16 line 1...second line of label
+    var popLine = labels.append("tspan")
+        .attr("class", "popLine")
+        .attr("x", function(d,i){
+            return x(i) + Math.sqrt(d.population * 0.01 / Math.PI) + 5;
+        })
+        .attr("dy", "15") //vertical offset
+        .text(function(d){
+            return "Pop. " + format(d.population); //use format generator to format numbers
+        });
+
+    var superiorLabelBounds = labels
+        .filter(function(d){
+            return d.city === "Superior";
+        })
+        .node()
+        .getBBox();
+
+    var rectX = Number(innerRect.attr("x"));
+    var rectY = Number(innerRect.attr("y"));
+    var rectPadding = 5;
+    var rectWidth = superiorLabelBounds.x + superiorLabelBounds.width + rectPadding - rectX;
+    var rectHeight = superiorLabelBounds.y + superiorLabelBounds.height + rectPadding - rectY;
+    var svgWidth = rectX + rectWidth + rectX;
+
+    innerRect
+        .attr("width", rectWidth)
+        .attr("height", rectHeight);
+
+    title.attr("x", svgWidth / 2);
+
+    container
+        .attr("width", svgWidth)
+        .attr("height", Math.max(h, rectY + rectHeight));
+
     //Example 2.6 line 3
     var circles = container.selectAll(".circles") //create an empty selection
         .data(cityPop) //here we feed in an array
