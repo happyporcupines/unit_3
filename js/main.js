@@ -62,7 +62,10 @@ function setMap(){
 
     var promises = [
         d3.json("data/social_capital_zip.topojson"),
-        d3.csv("data/zip_labels.csv")
+        d3.csv("data/zip_labels.csv").catch(function(error){
+            console.warn("Optional CSV file not loaded:", error);
+            return [];
+        })
     ];
 
     Promise.all(promises).then(callback).catch(function(error){
@@ -80,7 +83,7 @@ function setMap(){
 
     function renderMap(data){
         var socialCapitalTopo = data[0];
-        var csvData = data[1];
+        var csvData = data[1] || [];
         var ecBins = [
             {
                 label: "Very Low",
