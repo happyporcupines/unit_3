@@ -1,12 +1,18 @@
-window.onload = function(){
-    var width = 960;
-    var height = 650;
-    var margin = {
-        top: 70,
-        right: 230,
-        bottom: 120,
-        left: 90
-    };
+window.onload = setMap;
+
+function setMap(){
+    var width = 975;
+    var height = 610;
+
+    d3.select("body")
+        .append("h1")
+        .attr("class", "pageTitle")
+        .text("Economic Connectedness by Zipcode");
+
+    d3.select("body")
+        .append("p")
+        .attr("class", "pageSubtitle")
+        .text("Data from Opportunity Insights");
 
     var svg = d3.select("body")
         .append("svg")
@@ -14,126 +20,170 @@ window.onload = function(){
         .attr("width", width)
         .attr("height", height);
 
+    var legendContainer = d3.select("body")
+        .append("div")
+        .attr("class", "legendContainer");
+
+    var mapLayer = svg.append("g").attr("class", "mapLayer");
+
+    var loadingOverlay = d3.select("body")
+        .append("div")
+        .attr("class", "loadingOverlay is-visible")
+        .attr("aria-live", "polite")
+        .html("<div class=\"loadingText\">Rendering map...</div>");
+
+    var loadingText = loadingOverlay.select(".loadingText");
+    var loadingDelayId;
+
+    function showLoading(message){
+        clearTimeout(loadingDelayId);
+        if (message) {
+            loadingText.text(message);
+        }
+        loadingOverlay.classed("is-visible", true);
+    }
+
+    function hideLoading(){
+        clearTimeout(loadingDelayId);
+        loadingOverlay.classed("is-visible", false);
+    }
+
+    function scheduleLoading(message, delay){
+        clearTimeout(loadingDelayId);
+        loadingDelayId = setTimeout(function(){
+            showLoading(message);
+        }, delay);
+    }
+
     var tooltip = d3.select("body")
         .append("div")
         .attr("class", "tooltip")
         .style("opacity", 0);
 
-    d3.json("data/MegaCities.geojson").then(function(data){
-        var cityData = data.features.map(function(feature){
-            var properties = feature.properties;
-            var pop1985 = properties.Pop_1985;
-            var pop2015 = properties.Pop_2015;
+    var promises = [
+        d3.json("data/social_capital_zip.topojson"),
+        d3.csv("data/zip_labels.csv")
+    ];
 
-            return {
-                city: properties.City,
-                pop1985: pop1985,
-                pop2015: pop2015,
-                difference: pop2015 - pop1985
-            };
+    Promise.all(promises).then(callback).catch(function(error){
+        hideLoading();
+        console.error("Failed to load datasets:", error);
+    });
+
+    function callback(data){
+        requestAnimationFrame(function(){
+            requestAnimationFrame(function(){
+                renderMap(data);
+            });
+        });
+    }
+
+    function renderMap(data){
+        var socialCapitalTopo = data[0];
+        var csvData = data[1];
+        var ecBins = [
+            {
+                label: "Very Low",
+                rangeText: "0.00 - 0.50",
+                max: 0.50,
+                color: "#fff7bc",
+                message: "The Silos: These neighborhoods are largely \"keeping to their own,\" with very few friendships crossing income lines."
+            },
+            {
+                label: "Low",
+                rangeText: "0.51 - 0.80",
+                max: 0.80,
+                color: "#c7e9b4",
+                message: "The Climbing Phase: There is some movement here, but class barriers are still pretty sturdy."
+            },
+            {
+                label: "Average",
+                rangeText: "0.81 - 1.00",
+                max: 1.00,
+                color: "#7fcdbb",
+                message: "The Common Ground: These areas are approaching the point where your bank account doesn't dictate your social circle."
+            },
+            {
+                label: "High",
+                rangeText: "1.01 - 1.30",
+                max: 1.30,
+                color: "#41b6c4",
+                message: "The Bridge Builders: Like Sauk Centre, these places are actively \"mixing it up\" more than average."
+            },
+            {
+                label: "Exceptional",
+                rangeText: "1.31 - 1.71",
+                max: 1.71,
+                color: "#225ea8",
+                message: "Social Superstars: These rare pockets have extraordinary levels of class-crossing connection."
+            }
+        ];
+
+        function getEconomicConnectednessBin(score){
+            for (var i = 0; i < ecBins.length; i++) {
+                if (score <= ecBins[i].max) {
+                    return ecBins[i];
+                }
+            }
+            return ecBins[ecBins.length - 1];
+        }
+
+        var zipFeatures = topojson.feature(
+            socialCapitalTopo,
+            socialCapitalTopo.objects.zipcodes
+        ).features;
+
+        var csvByZip = new Map(csvData.map(function(d){
+            return [String(d.zip), d.place];
+        }));
+
+        zipFeatures.forEach(function(feature){
+            var zipCode = String(feature.properties.zip);
+            feature.properties.place = csvByZip.get(zipCode) || "Unknown place";
         });
 
-        var xExtent = d3.extent(cityData, function(d){
-            return d.pop1985;
-        });
+        var color = d3.scaleThreshold()
+            .domain([0.51, 0.81, 1.01, 1.31])
+            .range(ecBins.map(function(bin){
+                return bin.color;
+            }));
 
-        var yExtent = d3.extent(cityData, function(d){
-            return d.pop2015;
-        });
+        var projection = d3.geoAlbers()
+            .center([0, 38])
+            .rotate([96, 0])
+            .parallels([29.5, 45.5])
+            .scale(1200)
+            .translate([width / 2, height / 2]);
 
-        var differenceExtent = d3.extent(cityData, function(d){
-            return d.difference;
-        });
+        var path = d3.geoPath().projection(projection);
 
-        var x = d3.scaleLinear()
-            .range([margin.left, width - margin.right])
-            .domain([Math.max(0, xExtent[0] - 1), xExtent[1] + 2])
-            .nice();
-
-        var y = d3.scaleLinear()
-            .range([height - margin.bottom, margin.top])
-            .domain([Math.max(0, yExtent[0] - 1), yExtent[1] + 2])
-            .nice();
-
-        var radius = d3.scaleSqrt()
-            .range([8, 40])
-            .domain(differenceExtent);
-
-        var color = d3.scaleLinear()
-            .range(["#a8ddb5", "#1f78b4"])
-            .domain(differenceExtent);
-
-        var xAxis = d3.axisBottom(x);
-        var yAxis = d3.axisLeft(y);
-        var formatMillions = d3.format(".2f");
-
-        svg.append("g")
-            .attr("class", "axis")
-            .attr("transform", "translate(0," + (height - margin.bottom) + ")")
-            .call(xAxis);
-
-        svg.append("g")
-            .attr("class", "axis")
-            .attr("transform", "translate(" + margin.left + ",0)")
-            .call(yAxis);
-
-        svg.append("text")
-            .attr("class", "title")
-            .attr("text-anchor", "middle")
-            .attr("x", width / 2)
-            .attr("y", 35)
-            .text("Difference in Megacities Population between 1985 and 2015.");
-
-        svg.append("text")
-            .attr("class", "axisLabel")
-            .attr("text-anchor", "middle")
-            .attr("x", (width - margin.right + margin.left) / 2)
-            .attr("y", height - 50)
-            .text("Population in 1985 (millions)");
-
-        svg.append("text")
-            .attr("class", "axisLabel")
-            .attr("text-anchor", "middle")
-            .attr("transform", "translate(25," + ((height - margin.bottom + margin.top) / 2) + ") rotate(-90)")
-            .text("Population in 2015 (millions)");
-
-        svg.append("text")
-            .attr("class", "chartNote")
-            .attr("x", margin.left)
-            .attr("y", height - 18)
-            .text("Hover over a bubble to get city information.");
-
-        var bubbles = svg.selectAll(".circles")
-            .data(cityData)
+        mapLayer.selectAll(".zip")
+            .data(zipFeatures)
             .enter()
-            .append("circle")
-            .attr("class", "circles")
-            .attr("id", function(d){
-                return d.city;
-            })
-            .attr("r", function(d){
-                return radius(d.difference);
-            })
-            .attr("cx", function(d){
-                return x(d.pop1985);
-            })
-            .attr("cy", function(d){
-                return y(d.pop2015);
-            })
+            .append("path")
+            .attr("class", "zip")
+            .attr("d", path)
             .style("fill", function(d){
-                return color(d.difference);
+                return color(+d.properties.ec_zip);
             })
-            .style("fill-opacity", 0.7)
-            .style("stroke", "#1f1f1f")
-            .style("stroke-width", "1px")
+            .style("stroke", "#f7f7f7")
+            .style("stroke-width", "0.2px")
             .on("mouseenter", function(event, d){
-                d3.select(this)
-                    .style("stroke-width", "2px")
-                    .style("fill-opacity", 0.9);
+                var ecScore = +d.properties.ec_zip;
+                var volunteerismRate = +d.properties.volunteering_rate_zip;
+                var levelInfo = getEconomicConnectednessBin(ecScore);
 
+                d3.select(this).style("stroke", "#222").style("stroke-width", "0.6px");
                 tooltip
                     .style("opacity", 1)
-                    .html("<div class=\"tooltipTitle\">" + d.city + "</div><div>Change: " + formatMillions(d.difference) + " million</div>");
+                    .html(
+                        "<div class=\"tooltipTitle\">ZIP " + d.properties.postcode + "</div>" +
+                        "<div>Economic Connectedness: " + ecScore.toFixed(2) + "</div>" +
+                        "<div>Vollenteerism: " + (volunteerismRate * 100).toFixed(2) + "% of population</div>" +
+                        "<div class=\"tooltipSectionTitle\">What this economic connectedness score means:</div>" +
+                        "<div><strong>" + levelInfo.label + "</strong></div>" +
+                        "<div>" + levelInfo.message + "</div>"
+                    );
             })
             .on("mousemove", function(event){
                 tooltip
@@ -141,14 +191,111 @@ window.onload = function(){
                     .style("top", (event.pageY - 18) + "px");
             })
             .on("mouseleave", function(){
-                d3.select(this)
-                    .style("stroke-width", "1px")
-                    .style("fill-opacity", 0.7);
-
+                d3.select(this).style("stroke", "#f7f7f7").style("stroke-width", "0.2px");
                 tooltip.style("opacity", 0);
             });
-    }).catch(function(error){
-        console.error("Failed to load megacity data:", error);
-    });
+
+        var currentScale = 1;
+
+        var zoom = d3.zoom()
+            .scaleExtent([1, 8])
+            .filter(function(event){
+                if (event.type === "wheel") return true;
+                if (event.type === "mousedown" || event.type === "touchstart") {
+                    return currentScale > 1;
+                }
+                return !event.ctrlKey;
+            })
+            .on("start", function(){
+                scheduleLoading("Updating view...", 120);
+            })
+            .on("zoom", function(event){
+                currentScale = event.transform.k;
+                if (event.transform.k <= 1) {
+                    mapLayer.attr("transform", d3.zoomIdentity);
+                    return;
+                }
+                mapLayer.attr("transform", event.transform);
+            })
+            .on("end", function(){
+                requestAnimationFrame(function(){
+                    requestAnimationFrame(function(){
+                        hideLoading();
+                    });
+                });
+            });
+
+        svg.call(zoom);
+
+        svg.append("text")
+            .attr("class", "chartNote")
+            .attr("x", 15)
+            .attr("y", height - 15)
+            .text("Loaded " + csvData.length + " CSV rows and " + zipFeatures.length + " ZIP polygons.");
+
+        legendContainer.html("");
+        legendContainer.append("div")
+            .attr("class", "legendHeader")
+            .text("Legend");
+
+        var legendWidth = 520;
+        var legendHeight = 18;
+        var segmentWidth = legendWidth / ecBins.length;
+        var legendSvg = legendContainer.append("svg")
+            .attr("class", "legend")
+            .attr("width", legendWidth)
+            .attr("height", 92);
+
+        legendSvg.selectAll(".legendSegment")
+            .data(ecBins)
+            .enter()
+            .append("rect")
+            .attr("class", "legendSegment")
+            .attr("x", function(d, i){
+                return i * segmentWidth;
+            })
+            .attr("y", 8)
+            .attr("width", segmentWidth)
+            .attr("height", legendHeight)
+            .attr("fill", function(d){
+                return d.color;
+            })
+            .attr("stroke", "#d7d1c2")
+            .attr("stroke-width", 1);
+
+        legendSvg.selectAll(".legendLevelText")
+            .data(ecBins)
+            .enter()
+            .append("text")
+            .attr("class", "legendLevelText")
+            .attr("x", function(d, i){
+                return i * segmentWidth + segmentWidth / 2;
+            })
+            .attr("y", 46)
+            .attr("text-anchor", "middle")
+            .text(function(d){
+                return d.label;
+            });
+
+        legendSvg.selectAll(".legendRangeText")
+            .data(ecBins)
+            .enter()
+            .append("text")
+            .attr("class", "legendRangeText")
+            .attr("x", function(d, i){
+                return i * segmentWidth + segmentWidth / 2;
+            })
+            .attr("y", 66)
+            .attr("text-anchor", "middle")
+            .text(function(d){
+                return d.rangeText;
+            });
+
+        requestAnimationFrame(function(){
+            requestAnimationFrame(function(){
+                hideLoading();
+            });
+        });
+    }
 };
 
