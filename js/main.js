@@ -60,8 +60,19 @@ function setMap(){
         .attr("class", "tooltip")
         .style("opacity", 0);
 
+    function loadTopoJsonWithFallback(urls){
+        return urls.reduce(function(chain, url){
+            return chain.catch(function(){
+                return d3.json(url);
+            });
+        }, Promise.reject(new Error("No TopoJSON URL attempted yet")));
+    }
+
     var promises = [
-        d3.json("data/social_capital_zip.topojson"),
+        loadTopoJsonWithFallback([
+            "data/social_capital_zip.topojson",
+            "https://happyporcupines.github.io/unit_3/data/social_capital_zip.topojson"
+        ]),
         d3.csv("data/zip_labels.csv").catch(function(error){
             console.warn("Optional CSV file not loaded:", error);
             return [];
@@ -69,7 +80,11 @@ function setMap(){
     ];
 
     Promise.all(promises).then(callback).catch(function(error){
-        hideLoading();
+        showLoading("Failed to load map data.");
+        legendContainer.html("")
+            .append("div")
+            .attr("class", "loadError")
+            .text("Map data could not be loaded on this page load. Please refresh and try again.");
         console.error("Failed to load datasets:", error);
     });
 

@@ -140,3 +140,14 @@ body {
 	border-radius: 999px;
 	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
+
+.loadError {
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: #8d2f1b;
+	background: #fff0e8;
+	border: 1px solid #f3c8b8;
+	border-radius: 6px;
+	padding: 0.55rem 0.7rem;
+	max-width: 620px;
+}
