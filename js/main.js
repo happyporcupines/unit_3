@@ -1,7 +1,7 @@
 window.onload = setMap;
 
 function setMap(){
-    var width = 975;
+    var width = 760;
     var height = 610;
 
     d3.select("body")
@@ -153,7 +153,7 @@ function setMap(){
 
         var projection = d3.geoAlbers();
         projection.fitExtent(
-            [[20, 20], [width - 20, height - 20]],
+            [[8, 8], [width - 8, height - 8]],
             { type: "FeatureCollection", features: zipFeatures }
         );
 
