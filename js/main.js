@@ -14,7 +14,13 @@ function setMap(){
         .attr("class", "pageSubtitle")
         .text("Data from Opportunity Insights");
 
-    var svg = d3.select("body")
+    var mapShell = d3.select("body")
+        .append("div")
+        .attr("class", "mapShell")
+        .style("width", width + "px")
+        .style("height", height + "px");
+
+    var svg = mapShell
         .append("svg")
         .attr("class", "container")
         .attr("width", width)
@@ -26,7 +32,7 @@ function setMap(){
 
     var mapLayer = svg.append("g").attr("class", "mapLayer");
 
-    var loadingOverlay = d3.select("body")
+    var loadingOverlay = mapShell
         .append("div")
         .attr("class", "loadingOverlay is-visible")
         .attr("aria-live", "polite")

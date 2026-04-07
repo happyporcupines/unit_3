@@ -26,6 +26,10 @@ body {
 	background: #fffdf8;
 }
 
+.mapShell {
+	position: relative;
+}
+
 .legendContainer {
 	width: 700px;
 	margin-top: 12px;
@@ -112,7 +116,7 @@ body {
 }
 
 .loadingOverlay {
-	position: fixed;
+	position: absolute;
 	inset: 0;
 	background: rgba(247, 244, 234, 0.24);
 	display: flex;
