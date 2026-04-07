@@ -60,23 +60,8 @@ function setMap(){
         .attr("class", "tooltip")
         .style("opacity", 0);
 
-    function loadTopoJsonWithFallback(urls){
-        return urls.reduce(function(chain, url){
-            return chain.catch(function(){
-                return d3.json(url);
-            });
-        }, Promise.reject(new Error("No TopoJSON URL attempted yet")));
-    }
-
     var promises = [
-        loadTopoJsonWithFallback([
-            "data/social_capital_zip.topojson",
-            "https://happyporcupines.github.io/unit_3/data/social_capital_zip.topojson"
-        ]),
-        d3.csv("data/zip_labels.csv").catch(function(error){
-            console.warn("Optional CSV file not loaded:", error);
-            return [];
-        })
+        d3.json("data/social_capital_zip.topojson")
     ];
 
     Promise.all(promises).then(callback).catch(function(error){
@@ -98,7 +83,7 @@ function setMap(){
 
     function renderMap(data){
         var socialCapitalTopo = data[0];
-        var csvData = data[1] || [];
+        var csvData = [];
         var ecBins = [
             {
                 label: "Very Low",
