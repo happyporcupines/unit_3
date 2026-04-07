@@ -17,6 +17,8 @@ function setMap(){
     var mapShell = d3.select("body")
         .append("div")
         .attr("class", "mapShell")
+        .style("position", "relative")
+        .style("overflow", "hidden")
         .style("width", width + "px")
         .style("height", height + "px");
 
@@ -36,6 +38,10 @@ function setMap(){
         .append("div")
         .attr("class", "loadingOverlay is-visible")
         .attr("aria-live", "polite")
+        .style("position", "absolute")
+        .style("inset", "0")
+        .style("display", "grid")
+        .style("place-items", "center")
         .html("<div class=\"loadingText\">Rendering map...</div>");
 
     var loadingText = loadingOverlay.select(".loadingText");
