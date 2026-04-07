@@ -38,7 +38,7 @@ body {
 
 .mapShell {
 	position: relative;
-	flex-shrink: 0;
+	flex: 0 0 700px;
 }
 
 .legendContainer {
@@ -174,7 +174,7 @@ body {
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 	background: #fffdf8;
 	padding: 20px;
-	flex: 1;
+	flex: 0 0 550px;
 	max-height: 673px;
 	overflow-y: auto;
 }
