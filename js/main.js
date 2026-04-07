@@ -51,7 +51,7 @@
     ];
 
     // Page elements
-    var mapShell, svg, mapLayer, legendContainer, tooltip, loadingOverlay, loadingText;
+    var visualizationWrapper, mapColumn, mapShell, svg, mapLayer, legendContainer, tooltip, loadingOverlay, loadingText;
     var loadingDelayId;
 
     // =============================================
@@ -105,11 +105,15 @@
             .text("Data from Opportunity Insights");
 
         // Create wrapper for side-by-side layout
-        var visualizationWrapper = d3.select("body")
+        visualizationWrapper = d3.select("body")
             .append("div")
-            .attr("class", "visualizationWrapper");
+            .attr("class", "visualizationWrapper is-render-pending");
 
-        mapShell = visualizationWrapper
+        mapColumn = visualizationWrapper
+            .append("div")
+            .attr("class", "mapColumn");
+
+        mapShell = mapColumn
             .append("div")
             .attr("class", "mapShell")
             .style("position", "relative")
@@ -124,8 +128,7 @@
             .attr("width", width)
             .attr("height", height);
 
-        // Create legend container inside wrapper (displayed below map and chart)
-        legendContainer = visualizationWrapper
+        legendContainer = mapColumn
             .append("div")
             .attr("class", "legendContainer");
 
@@ -363,7 +366,7 @@
     // =============================================
     function createBarChart(zipFeatures, colorScale, visualizationWrapper){
         // Chart frame dimensions
-        var chartWidth = 550,
+        var chartWidth = 520,
             chartHeight = 673,
             leftPadding = 60,
             rightPadding = 20,
@@ -546,11 +549,9 @@
         drawMap(zipFeatures, color, projection, path);
         setupZoom();
         
-        // Get the visualization wrapper and pass it to createBarChart
-        var visualizationWrapper = d3.select(".visualizationWrapper");
         createBarChart(zipFeatures, color, visualizationWrapper);
-        
         createLegend();
+        visualizationWrapper.classed("is-render-pending", false).classed("is-render-ready", true);
 
         requestAnimationFrame(function(){
             requestAnimationFrame(function(){

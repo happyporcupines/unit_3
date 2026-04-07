@@ -21,14 +21,28 @@ body {
 }
 
 .visualizationWrapper {
-	display: flex;
-	flex-wrap: wrap;
+	display: grid;
+	grid-template-columns: 700px minmax(500px, 1fr);
 	gap: 24px;
 	align-items: flex-start;
-	align-content: flex-start;
 	margin-bottom: 0;
 	width: 100%;
 	overflow-x: auto;
+}
+
+.visualizationWrapper.is-render-pending {
+	visibility: hidden;
+}
+
+.visualizationWrapper.is-render-ready {
+	visibility: visible;
+}
+
+.mapColumn {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	width: 700px;
 }
 
 .container {
@@ -39,12 +53,11 @@ body {
 
 .mapShell {
 	position: relative;
-	flex: 0 0 700px;
+	width: 700px;
 }
 
 .legendContainer {
-	width: 100%;
-	flex-basis: 100%;
+	width: 700px;
 	margin-top: 0;
 	padding: 0 0 8px 0;
 }
@@ -174,10 +187,35 @@ body {
 	border-radius: 6px;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 	background: #fffdf8;
-	padding: 20px;
-	flex: 0 0 550px;
+	padding: 16px;
+	width: 100%;
+	min-width: 500px;
+	box-sizing: border-box;
 	max-height: 673px;
 	overflow-y: auto;
+}
+
+@media (max-width: 1280px) {
+	.visualizationWrapper {
+		grid-template-columns: 1fr;
+	}
+
+	.mapColumn {
+		width: 100%;
+		max-width: 700px;
+	}
+
+	.mapShell {
+		width: 700px;
+	}
+
+	.legendContainer {
+		width: 100%;
+	}
+
+	.barChartContainer {
+		min-width: 0;
+	}
 }
 
 .barChart {
