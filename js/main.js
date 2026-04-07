@@ -545,11 +545,12 @@
 
         drawMap(zipFeatures, color, projection, path);
         setupZoom();
-        createLegend();
         
         // Get the visualization wrapper and pass it to createBarChart
         var visualizationWrapper = d3.select(".visualizationWrapper");
         createBarChart(zipFeatures, color, visualizationWrapper);
+        
+        createLegend();
 
         requestAnimationFrame(function(){
             requestAnimationFrame(function(){
