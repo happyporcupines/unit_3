@@ -18,6 +18,7 @@ function setMap(){
         .append("div")
         .attr("class", "mapShell")
         .style("position", "relative")
+        .style("display", "block")
         .style("overflow", "hidden")
         .style("width", width + "px")
         .style("height", height + "px");
@@ -39,6 +40,10 @@ function setMap(){
         .attr("class", "loadingOverlay is-visible")
         .attr("aria-live", "polite")
         .style("position", "absolute")
+        .style("left", "0")
+        .style("top", "0")
+        .style("width", width + "px")
+        .style("height", height + "px")
         .style("inset", "0")
         .style("display", "grid")
         .style("place-items", "center")
