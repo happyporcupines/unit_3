@@ -124,11 +124,10 @@
             .attr("width", width)
             .attr("height", height);
 
-        // Create legend container after visualization wrapper (displayed below map and chart)
-        legendContainer = d3.select("body")
+        // Create legend container inside wrapper (displayed below map and chart)
+        legendContainer = visualizationWrapper
             .append("div")
-            .attr("class", "legendContainer")
-            .style("clear", "both");
+            .attr("class", "legendContainer");
 
         mapLayer = svg.append("g").attr("class", "mapLayer");
 
