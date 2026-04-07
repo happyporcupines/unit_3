@@ -1,8 +1,8 @@
 window.onload = setMap;
 
 function setMap(){
-    var width = 760;
-    var height = 610;
+    var width = 700;
+    var height = 520;
 
     d3.select("body")
         .append("h1")
@@ -136,6 +136,11 @@ function setMap(){
             socialCapitalTopo.objects.zipcodes
         ).features;
 
+        var loadedStateCodes = Array.from(new Set(zipFeatures.map(function(feature){
+            var county = String(feature.properties.county || "").padStart(5, "0");
+            return county.slice(0, 2);
+        }))).sort();
+
         var csvByZip = new Map(csvData.map(function(d){
             return [String(d.zip), d.place];
         }));
@@ -153,7 +158,7 @@ function setMap(){
 
         var projection = d3.geoAlbers();
         projection.fitExtent(
-            [[8, 8], [width - 8, height - 8]],
+            [[4, 4], [width - 4, height - 4]],
             { type: "FeatureCollection", features: zipFeatures }
         );
 
@@ -233,7 +238,7 @@ function setMap(){
             .attr("class", "chartNote")
             .attr("x", 15)
             .attr("y", height - 15)
-            .text("Loaded " + csvData.length + " CSV rows and " + zipFeatures.length + " ZIP polygons.");
+            .text("Loaded " + csvData.length + " CSV rows, " + zipFeatures.length + " ZIP polygons, states: " + loadedStateCodes.join(",") + ".");
 
         legendContainer.html("");
         legendContainer.append("div")
