@@ -225,7 +225,7 @@
             ? "N/A" 
             : (volunteerismRate * 100).toFixed(2) + "%";
 
-        d3.select(this).style("stroke", "#222").style("stroke-width", "0.6px");
+        d3.select(this).style("stroke", "#e8000d").style("stroke-width", "0.6px");
         
         // Highlight corresponding bar
         var zipCode = d.properties.zip;
@@ -449,7 +449,7 @@
                 
                 // Highlight corresponding zip on map
                 var zipCode = d.properties.zip;
-                d3.selectAll(".zip[data-zip='" + zipCode + "']").style("stroke", "#222").style("stroke-width", "0.6px");
+                d3.selectAll(".zip[data-zip='" + zipCode + "']").style("stroke", "#e8000d").style("stroke-width", "0.6px");
                 
                 tooltip
                     .style("opacity", 1)

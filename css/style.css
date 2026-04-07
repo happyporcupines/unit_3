@@ -232,8 +232,8 @@ body {
 }
 
 .bar.highlighted {
-	fill: #003d7a !important;
-	stroke: #001a4d !important;
+	fill: #e8000d !important;
+	stroke: #9e0009 !important;
 	stroke-width: 1.5px !important;
 	opacity: 1;
 }
