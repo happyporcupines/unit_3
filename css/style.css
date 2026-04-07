@@ -191,8 +191,6 @@ body {
 	width: 100%;
 	min-width: 500px;
 	box-sizing: border-box;
-	max-height: 673px;
-	overflow-y: auto;
 }
 
 @media (max-width: 1280px) {

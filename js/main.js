@@ -518,13 +518,6 @@
             .style("stroke", "#999")
             .style("stroke-width", 1.5);
 
-        // Add chart note
-        chart.append("text")
-            .attr("class", "chartNote")
-            .attr("x", 15)
-            .attr("y", chartHeight - 10)
-            .style("font-size", "0.85em")
-            .text("Showing " + dataWithValues.length + " zipcodes with available data.");
     }
 
     // =============================================
