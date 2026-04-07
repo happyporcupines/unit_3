@@ -22,10 +22,10 @@ body {
 
 .visualizationWrapper {
 	display: flex;
-	flex-wrap: nowrap;
+	flex-wrap: wrap;
 	gap: 24px;
 	align-items: flex-start;
-	margin-bottom: 20px;
+	margin-bottom: 0;
 	width: 100%;
 	overflow-x: auto;
 }
@@ -43,9 +43,9 @@ body {
 
 .legendContainer {
 	width: 700px;
-	margin-top: 20px;
+	margin-top: 0;
 	padding: 0 0 8px 0;
-	clear: both;
+	clear: none;
 }
 
 .legend {

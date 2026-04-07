@@ -436,8 +436,7 @@
             .style("fill", function(d){
                 return colorScale(parseFloat(d.properties.ec_zip));
             })
-            .style("stroke", "#f7f7f7")
-            .style("stroke-width", "0.5px");
+            .style("stroke", "none");
 
         // Add interactivity to bars
         bars.on("mouseenter", function(event, d){
