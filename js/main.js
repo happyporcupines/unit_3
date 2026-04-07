@@ -185,7 +185,7 @@
     function createColorScale(){
         return d3.scaleThreshold()
             .domain([0.51, 0.81, 1.01, 1.31])
-            .range(ecBins.map(function(bin){
+            .range(ecBins.filter(function(bin){ return !bin.isNoData; }).map(function(bin){
                 return bin.color;
             }));
     }
