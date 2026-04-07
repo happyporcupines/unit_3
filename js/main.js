@@ -151,12 +151,11 @@ function setMap(){
                 return bin.color;
             }));
 
-        var projection = d3.geoAlbers()
-            .center([0, 38])
-            .rotate([96, 0])
-            .parallels([29.5, 45.5])
-            .scale(1200)
-            .translate([width / 2, height / 2]);
+        var projection = d3.geoAlbers();
+        projection.fitExtent(
+            [[20, 20], [width - 20, height - 20]],
+            { type: "FeatureCollection", features: zipFeatures }
+        );
 
         var path = d3.geoPath().projection(projection);
 
