@@ -20,6 +20,13 @@ body {
 	color: #5b5b5b;
 }
 
+.visualizationWrapper {
+	display: flex;
+	gap: 24px;
+	align-items: flex-start;
+	margin-bottom: 20px;
+}
+
 .container {
 	display: block;
 	margin: 0;
@@ -28,12 +35,14 @@ body {
 
 .mapShell {
 	position: relative;
+	flex-shrink: 0;
 }
 
 .legendContainer {
 	width: 700px;
-	margin-top: 12px;
+	margin-top: 20px;
 	padding: 0 0 8px 0;
+	clear: both;
 }
 
 .legend {
@@ -160,6 +169,12 @@ body {
 .barChartContainer {
 	border-radius: 6px;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+	background: #fffdf8;
+	padding: 20px;
+	flex: 1;
+	min-width: 400px;
+	max-height: 673px;
+	overflow-y: auto;
 }
 
 .barChart {
@@ -169,12 +184,19 @@ body {
 
 .bar {
 	cursor: pointer;
-	transition: opacity 0.15s ease;
+	transition: fill 0.2s ease, opacity 0.15s ease;
 }
 
 .bar:hover {
 	opacity: 0.85;
 	filter: brightness(0.95);
+}
+
+.bar.highlighted {
+	fill: #003d7a !important;
+	stroke: #001a4d !important;
+	stroke-width: 1.5px !important;
+	opacity: 1;
 }
 
 .chartBackground {

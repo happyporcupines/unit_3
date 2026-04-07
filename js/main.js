@@ -104,7 +104,12 @@
             .attr("class", "pageSubtitle")
             .text("Data from Opportunity Insights");
 
-        mapShell = d3.select("body")
+        // Create wrapper for side-by-side layout
+        var visualizationWrapper = d3.select("body")
+            .append("div")
+            .attr("class", "visualizationWrapper");
+
+        mapShell = visualizationWrapper
             .append("div")
             .attr("class", "mapShell")
             .style("position", "relative")
@@ -119,9 +124,11 @@
             .attr("width", width)
             .attr("height", height);
 
+        // Create legend container after visualization wrapper (displayed below map and chart)
         legendContainer = d3.select("body")
             .append("div")
-            .attr("class", "legendContainer");
+            .attr("class", "legendContainer")
+            .style("clear", "both");
 
         mapLayer = svg.append("g").attr("class", "mapLayer");
 
@@ -187,6 +194,7 @@
             .enter()
             .append("path")
             .attr("class", "zip")
+            .attr("data-zip", function(d){ return d.properties.zip; })
             .attr("d", path)
             .style("fill", function(d){
                 var ecValue = d.properties.ec_zip;
@@ -216,6 +224,11 @@
             : (volunteerismRate * 100).toFixed(2) + "%";
 
         d3.select(this).style("stroke", "#222").style("stroke-width", "0.6px");
+        
+        // Highlight corresponding bar
+        var zipCode = d.properties.zip;
+        d3.selectAll(".bar.zip-" + zipCode).classed("highlighted", true);
+        
         tooltip
             .style("opacity", 1)
             .html(
@@ -236,6 +249,11 @@
 
     function onZipMouseLeave(){
         d3.select(this).style("stroke", "#f7f7f7").style("stroke-width", "0.2px");
+        
+        // Remove bar highlight
+        var zipCode = d3.select(this).datum().properties.zip;
+        d3.selectAll(".bar.zip-" + zipCode).classed("highlighted", false);
+        
         tooltip.style("opacity", 0);
     }
 
@@ -344,10 +362,10 @@
     // =============================================
     // BAR CHART FUNCTION
     // =============================================
-    function createBarChart(zipFeatures, colorScale){
+    function createBarChart(zipFeatures, colorScale, visualizationWrapper){
         // Chart frame dimensions
-        var chartWidth = window.innerWidth * 0.9,
-            chartHeight = 500,
+        var chartWidth = 550,
+            chartHeight = 673,
             leftPadding = 60,
             rightPadding = 20,
             topBottomPadding = 40,
@@ -356,13 +374,8 @@
             translate = "translate(" + leftPadding + "," + topBottomPadding + ")";
 
         // Create a new svg element for the bar chart
-        var chartContainer = d3.select("body")
-            .append("div")
-            .attr("class", "barChartContainer")
-            .style("margin-top", "30px")
-            .style("overflow-x", "auto")
-            .style("background", "#fffdf8")
-            .style("padding", "20px");
+        var chartContainer = visualizationWrapper.append("div")
+            .attr("class", "barChartContainer");
 
         var chart = chartContainer.append("svg")
             .attr("width", chartWidth)
@@ -431,7 +444,12 @@
                 var ecScore = parseFloat(d.properties.ec_zip);
                 var levelInfo = getEconomicConnectednessBin(ecScore);
                 
-                d3.select(this).style("stroke", "#222").style("stroke-width", "1.5px");
+                d3.select(this).classed("highlighted", true);
+                
+                // Highlight corresponding zip on map
+                var zipCode = d.properties.zip;
+                d3.selectAll(".zip[data-zip='" + zipCode + "']").style("stroke", "#222").style("stroke-width", "0.6px");
+                
                 tooltip
                     .style("opacity", 1)
                     .html(
@@ -447,8 +465,13 @@
                     .style("left", (event.pageX + 14) + "px")
                     .style("top", (event.pageY - 18) + "px");
             })
-            .on("mouseleave", function(){
-                d3.select(this).style("stroke", "#f7f7f7").style("stroke-width", "0.5px");
+            .on("mouseleave", function(event, d){
+                d3.select(this).classed("highlighted", false);
+                
+                // Remove highlight from corresponding zip on map
+                var zipCode = d.properties.zip;
+                d3.selectAll(".zip[data-zip='" + zipCode + "']").style("stroke", "#f7f7f7").style("stroke-width", "0.2px");
+                
                 tooltip.style("opacity", 0);
             });
 
@@ -500,7 +523,7 @@
             .attr("x", 15)
             .attr("y", chartHeight - 10)
             .style("font-size", "0.85em")
-            .text("Showing " + dataWithValues.length + " zipcodes with available data. Sorted by economic connectedness score (highest to lowest).");
+            .text("Showing " + dataWithValues.length + " zipcodes with available data.");
     }
 
     // =============================================
@@ -524,9 +547,11 @@
 
         drawMap(zipFeatures, color, projection, path);
         setupZoom();
-        addChartNote(zipFeatures, loadedStateCodes);
         createLegend();
-        createBarChart(zipFeatures, color);
+        
+        // Get the visualization wrapper and pass it to createBarChart
+        var visualizationWrapper = d3.select(".visualizationWrapper");
+        createBarChart(zipFeatures, color, visualizationWrapper);
 
         requestAnimationFrame(function(){
             requestAnimationFrame(function(){
